@@ -35,10 +35,10 @@ jobs:
           context: frontend
           file: Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}-builder
+          labels: ${{ steps.meta.outputs.labels }}-builder
           target: builder
-          outputs: imageid=geotrek-rando-v3-builder
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
