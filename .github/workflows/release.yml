@@ -16,7 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
+        with: |
+          cd frontend
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -33,7 +34,7 @@ jobs:
       - name: Build and push Docker image builder
         uses: docker/build-push-action@v3
         with:
-          context: ./frontend
+          context: .
           file: Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}-builder
@@ -43,7 +44,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./frontend
+          context: .
           file: Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
