@@ -34,17 +34,7 @@ jobs:
         id: meta-builder
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-builder2
-
-      - name: Build and push Docker image builder
-        uses: docker/build-push-action@v3
-        with:
-          context: frontend
-          file: ./frontend/Dockerfile
-          push: true
-          tags: ${{ steps.meta-builder.outputs.tags }}
-          labels: ${{ steps.meta-builder2.outputs.labels }}
-          target: builder
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-builder
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -54,3 +44,13 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push Docker image builder
+        uses: docker/build-push-action@v3
+        with:
+          context: frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-builder.outputs.tags }}
+          labels: ${{ steps.meta-builder.outputs.labels }}
+          target: builder
