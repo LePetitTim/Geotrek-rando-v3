@@ -3,11 +3,8 @@ FROM node:17-alpine AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat g++ gcc libgcc libstdc++ linux-headers make python3
 WORKDIR /app
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM node:17-alpine AS builder
@@ -18,9 +15,10 @@ RUN yarn build
 
 FROM node:17-alpine AS builder_optim
 WORKDIR /app
-COPY . .
-COPY --from=deps /app/node_modules ./node_modules
-RUN yarn build && yarn install --production --ignore-scripts --prefer-offline
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
+RUN yarn install --production --ignore-scripts --prefer-offline
 
 # Production image, copy all the files and run next
 FROM node:17-alpine AS runner
@@ -32,13 +30,12 @@ RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
 # You only need to copy next.config.js if you are NOT using the default configuration
-COPY --from=builder_optim /app/next.config.js ./
-COPY --from=builder_optim /app/cache.js ./
-COPY --from=builder_optim /app/config ./config
-COPY --from=builder_optim /app/src/ ./src
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/cache.js ./
+COPY --from=builder /app/config ./config
+COPY --chown=nextjs:nodejs --from=builder /app/src/ ./src
 COPY --from=builder_optim /app/node_modules ./node_modules
 COPY --from=builder_optim /app/package.json ./package.json
-RUN chown -R nextjs:nodejs ./src/.next
 
 USER nextjs
 
