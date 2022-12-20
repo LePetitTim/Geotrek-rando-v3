@@ -16,8 +16,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Move to frontend
         run: |
           cd frontend
+
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
