@@ -39,8 +39,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-builder:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-builder:{{version}}
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-builder:latest" | tr '[:upper:]' '[:lower:]'
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-builder:{{version}}" | tr '[:upper:]' '[:lower:]'
           labels: ${{ steps.meta.outputs.labels }}
           target: builder
 
